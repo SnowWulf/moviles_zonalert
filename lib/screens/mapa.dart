@@ -33,7 +33,7 @@ class MapaPage extends StatefulWidget {
 
 class _MapaPageState extends State<MapaPage> {
   final MapController _mapController = MapController();
-  LatLng _ubicacionActual = LatLng(1.2136, -77.2811); // Coordenadas de Pasto por defecto
+  LatLng _ubicacionActual = LatLng(1.2136, -77.2811); // Coordenadas de Pasto por defecto.
 
   @override
   void initState() {
