@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'mapa.dart'; // aseguramos que redirige al mapa
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
+import 'mapa.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,12 +16,22 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Espera 3 segundos y redirige al mapa
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MapaPage()),
-      );
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Usuario ya autenticado → ir directo al mapa
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MapaPage()),
+        );
+      } else {
+        // Usuario no autenticado → ir al login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      }
     });
   }
 
@@ -31,12 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo de la app (puedes poner tu imagen)
-            Image.asset(
-              'android/assets/ZonAlert.png',
-              width: 120,
-              height: 120,
-            ),
+            Image.asset('android/assets/ZonAlert.png', width: 120, height: 120),
             const SizedBox(height: 20),
             const Text(
               "ZonAlert",
@@ -50,10 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 10),
             const Text(
               "Camina Seguro",
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 30),
             const CircularProgressIndicator(color: Colors.white),

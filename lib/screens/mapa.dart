@@ -2,27 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-
-void main() {
-  runApp(const ZonAlertApp());
-}
-
-class ZonAlertApp extends StatelessWidget {
-  const ZonAlertApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ZonAlert',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-      ),
-      home: const MapaPage(),
-    );
-  }
-}
+import '../services/auth_service.dart';
+import 'login_page.dart';
 
 class MapaPage extends StatefulWidget {
   const MapaPage({super.key});
@@ -33,6 +14,7 @@ class MapaPage extends StatefulWidget {
 
 class _MapaPageState extends State<MapaPage> {
   final MapController _mapController = MapController();
+  final AuthService _authService = AuthService();
   LatLng _ubicacionActual = LatLng(1.2136, -77.2811); // Coordenadas de Pasto por defecto.
 
   @override
@@ -62,6 +44,16 @@ class _MapaPageState extends State<MapaPage> {
     _mapController.move(_ubicacionActual, 15);
   }
 
+  Future<void> _cerrarSesion() async {
+    await _authService.signOut();
+    if (context.mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +74,13 @@ class _MapaPageState extends State<MapaPage> {
             fontSize: 22,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.indigo),
+            onPressed: _cerrarSesion,
+            tooltip: 'Cerrar sesión',
+          ),
+        ],
       ),
 
       // Contenedor central con el mapa dentro
@@ -112,7 +111,8 @@ class _MapaPageState extends State<MapaPage> {
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.zonalert',
                     ),
 
@@ -139,7 +139,8 @@ class _MapaPageState extends State<MapaPage> {
                           point: _ubicacionActual,
                           width: 40,
                           height: 40,
-                          child: const Icon(Icons.my_location, color: Colors.blue),
+                          child:
+                              const Icon(Icons.my_location, color: Colors.blue),
                         ),
                       ],
                     ),

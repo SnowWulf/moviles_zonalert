@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'screens/splashscreen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const ZonAlertApp());
 }
 
@@ -10,13 +17,13 @@ class ZonAlertApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp( //nombre aplicación, este va en el widget_test.dart
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ZonAlert',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
       ),
-      home: const SplashScreen(), // <-- inicia aquí
+      home: const SplashScreen(),
     );
   }
 }
