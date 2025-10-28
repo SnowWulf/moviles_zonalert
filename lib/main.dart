@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'screens/splashscreen.dart';
+import 'utils/alert_helper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AlertHelper.init(); // Inicializa notificaciones
   runApp(const ZonAlertApp());
 }
+
 
 class ZonAlertApp extends StatelessWidget {
   const ZonAlertApp({super.key});

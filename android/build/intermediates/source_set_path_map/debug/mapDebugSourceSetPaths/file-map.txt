@@ -1,0 +1,34 @@
+com.example.zonalert_new-drawerlayout-1.1.1-0 C:\Users\ccp75\.gradle\caches\8.12\transforms\0e9c8c56d1be4e7d0ca13bfc6b9b9bcf\transformed\drawerlayout-1.1.1\res
+com.example.zonalert_new-coordinatorlayout-1.1.0-1 C:\Users\ccp75\.gradle\caches\8.12\transforms\10e630825fb4e0c5fd511b20eed575e6\transformed\coordinatorlayout-1.1.0\res
+com.example.zonalert_new-material-1.11.0-2 C:\Users\ccp75\.gradle\caches\8.12\transforms\2966ed7c3d99c480b7df9d56554de383\transformed\material-1.11.0\res
+com.example.zonalert_new-core-runtime-2.2.0-3 C:\Users\ccp75\.gradle\caches\8.12\transforms\2f86bb2847f8c1eeeb6a949d522eada3\transformed\core-runtime-2.2.0\res
+com.example.zonalert_new-jetified-annotation-experimental-1.4.0-4 C:\Users\ccp75\.gradle\caches\8.12\transforms\38e3f381553bfb1e561f2f5b45f177d5\transformed\jetified-annotation-experimental-1.4.0\res
+com.example.zonalert_new-jetified-profileinstaller-1.3.1-5 C:\Users\ccp75\.gradle\caches\8.12\transforms\3922f47838070e6db304cf9a038146fd\transformed\jetified-profileinstaller-1.3.1\res
+com.example.zonalert_new-jetified-startup-runtime-1.1.1-6 C:\Users\ccp75\.gradle\caches\8.12\transforms\42d478d6013065b32538b12d3ef7b157\transformed\jetified-startup-runtime-1.1.1\res
+com.example.zonalert_new-fragment-1.5.4-7 C:\Users\ccp75\.gradle\caches\8.12\transforms\42e3f329eb1a29d598558273c4002ce2\transformed\fragment-1.5.4\res
+com.example.zonalert_new-jetified-lifecycle-process-2.6.2-8 C:\Users\ccp75\.gradle\caches\8.12\transforms\4d88f0ea4a1632d17034ac4d410d6a6b\transformed\jetified-lifecycle-process-2.6.2\res
+com.example.zonalert_new-lifecycle-viewmodel-2.6.2-9 C:\Users\ccp75\.gradle\caches\8.12\transforms\596748148e19cc989b49180be7d9487a\transformed\lifecycle-viewmodel-2.6.2\res
+com.example.zonalert_new-jetified-viewpager2-1.0.0-10 C:\Users\ccp75\.gradle\caches\8.12\transforms\5ec0701502d1cff35cfc5f447faf1bc0\transformed\jetified-viewpager2-1.0.0\res
+com.example.zonalert_new-core-1.13.0-11 C:\Users\ccp75\.gradle\caches\8.12\transforms\77a5d5fa481337d8cda99926033e3ad9\transformed\core-1.13.0\res
+com.example.zonalert_new-transition-1.2.0-12 C:\Users\ccp75\.gradle\caches\8.12\transforms\7e399a71aec3b0525d6256252e253aed\transformed\transition-1.2.0\res
+com.example.zonalert_new-jetified-core-ktx-1.13.0-13 C:\Users\ccp75\.gradle\caches\8.12\transforms\8f834e4361f122e1ad7a3ea553818e40\transformed\jetified-core-ktx-1.13.0\res
+com.example.zonalert_new-jetified-emoji2-1.3.0-14 C:\Users\ccp75\.gradle\caches\8.12\transforms\91563463dceceeb56ff13891862e8b2a\transformed\jetified-emoji2-1.3.0\res
+com.example.zonalert_new-lifecycle-livedata-2.6.2-15 C:\Users\ccp75\.gradle\caches\8.12\transforms\af16c7863ae96e9e73a9c3c5353e4081\transformed\lifecycle-livedata-2.6.2\res
+com.example.zonalert_new-jetified-appcompat-resources-1.7.0-16 C:\Users\ccp75\.gradle\caches\8.12\transforms\b24335efc40c940ea6facccac9d77d05\transformed\jetified-appcompat-resources-1.7.0\res
+com.example.zonalert_new-lifecycle-livedata-core-2.6.2-17 C:\Users\ccp75\.gradle\caches\8.12\transforms\bf9e59ef1eac837f601b677ba009c86c\transformed\lifecycle-livedata-core-2.6.2\res
+com.example.zonalert_new-lifecycle-runtime-2.6.2-18 C:\Users\ccp75\.gradle\caches\8.12\transforms\c36359af977710963ce9c7f32c6a7b78\transformed\lifecycle-runtime-2.6.2\res
+com.example.zonalert_new-jetified-activity-1.8.0-19 C:\Users\ccp75\.gradle\caches\8.12\transforms\cdf99f7b88cbc2cf84814ef5d73c00af\transformed\jetified-activity-1.8.0\res
+com.example.zonalert_new-jetified-emoji2-views-helper-1.3.0-20 C:\Users\ccp75\.gradle\caches\8.12\transforms\d64eff79e58de0a46b2f0700448c1f41\transformed\jetified-emoji2-views-helper-1.3.0\res
+com.example.zonalert_new-constraintlayout-2.0.1-21 C:\Users\ccp75\.gradle\caches\8.12\transforms\e2272efc725cc1b91f40b124abc5f286\transformed\constraintlayout-2.0.1\res
+com.example.zonalert_new-appcompat-1.7.0-22 C:\Users\ccp75\.gradle\caches\8.12\transforms\e331a77b95ed0300152942a652ba50aa\transformed\appcompat-1.7.0\res
+com.example.zonalert_new-jetified-lifecycle-viewmodel-savedstate-2.6.2-23 C:\Users\ccp75\.gradle\caches\8.12\transforms\eb659ff803ec4be21069a754d63f51ff\transformed\jetified-lifecycle-viewmodel-savedstate-2.6.2\res
+com.example.zonalert_new-jetified-savedstate-1.2.1-24 C:\Users\ccp75\.gradle\caches\8.12\transforms\ed1f2a84141e93c19d75fdc67842bc1f\transformed\jetified-savedstate-1.2.1\res
+com.example.zonalert_new-recyclerview-1.1.0-25 C:\Users\ccp75\.gradle\caches\8.12\transforms\f454454cfbf87c585fecbfa06fd23685\transformed\recyclerview-1.1.0\res
+com.example.zonalert_new-cardview-1.0.0-26 C:\Users\ccp75\.gradle\caches\8.12\transforms\ff3f43e3175868803f0985f4e03ff790\transformed\cardview-1.0.0\res
+com.example.zonalert_new-pngs-27 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\build\generated\res\pngs\debug
+com.example.zonalert_new-resValues-28 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\build\generated\res\resValues\debug
+com.example.zonalert_new-packageDebugResources-29 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.zonalert_new-packageDebugResources-30 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.zonalert_new-debug-31 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.zonalert_new-debug-32 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\src\debug\res
+com.example.zonalert_new-main-33 C:\Users\ccp75\OneDrive\Documentos\Taller Moviles\avance\moviles_zonalert\android\src\main\res
