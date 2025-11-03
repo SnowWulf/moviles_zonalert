@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/splashscreen.dart';
 import 'utils/alert_helper.dart';
+import 'package:flutter/material.dart';
+import 'screens/home_page.dart'; 
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +17,7 @@ class ZonAlertApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp( //nombre aplicación, este va en el widget_test.dart
+    return MaterialApp( 
       debugShowCheckedModeBanner: false,
       title: 'ZonAlert',
       theme: ThemeData(

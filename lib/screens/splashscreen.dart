@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'mapa.dart'; // aseguramos que redirige al mapa
+import 'home_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,11 +14,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Espera 3 segundos y redirige al mapa
+    // Espera 3 segundos y redirige al HomePage
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MapaPage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     });
   }
@@ -26,37 +26,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo,
+      backgroundColor: const Color(0xFF142535), // Azul oscuro de fondo
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo de la app (puedes poner tu imagen)
+            // Logo centrado
             Image.asset(
               'android/assets/ZonAlert.png',
-              width: 120,
-              height: 120,
+              width: 160,
+              height: 160,
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "ZonAlert",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+            const SizedBox(height: 40),
+
+            // Círculo dorado girando
+            const SizedBox(
+              width: 45,
+              height: 45,
+              child: CircularProgressIndicator(
+                color: Color(0xFFE9AE5D), // Dorado
+                strokeWidth: 4,
               ),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              "Camina Seguro",
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 30),
-            const CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),

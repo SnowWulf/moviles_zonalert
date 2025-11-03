@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  fl_chart: ^0.68.0
+  google_fonts: ^6.1.0
   flutter:
     sdk: flutter
   flutter_map: ^7.0.2
@@ -36,6 +38,9 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   geolocator: ^14.0.0
   permission_handler: ^11.3.0
+  flutter_compass: ^0.8.1 #Para orientación del telefono
+  shared_preferences: ^2.2.3 #para guardar config local
+
 
 
 
@@ -67,7 +72,17 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/bandit.png
+    - assets/dark.png
+    - assets/fender.png
+    - assets/good.png
+    - assets/sin_incidente.png
+    - assets/other.png
+    - assets/cara_buena.png
+    - assets/cara_mala.png
+    - assets/cara_regular.png
     - android/assets/ZonAlert.png
+    - android/assets/perfil.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
