@@ -13,7 +13,7 @@ class AlertHelper {
   /// Alerta de zona peligrosa
   static Future<void> showDangerAlert() async {
     // Vibración
-    if (await Vibration.hasVibrator() ?? false) {
+    if (await Vibration.hasVibrator()) {
       Vibration.vibrate(duration: 1000);
     }
 

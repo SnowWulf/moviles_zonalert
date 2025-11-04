@@ -12,15 +12,18 @@ class AnalisisZonasPage extends StatefulWidget {
 class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dorado = theme.colorScheme.secondary;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF142535), // Azul oscuro
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1C3C50),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
           'Análisis de Zonas',
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: dorado,
           ),
         ),
         centerTitle: true,
@@ -36,7 +39,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
               child: Text(
                 'Resumen de Seguridad',
                 style: GoogleFonts.montserrat(
-                  color: const Color(0xFFE9AE5D),
+                  color: dorado,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -69,7 +72,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
               child: Text(
                 'Insights del Análisis IA',
                 style: GoogleFonts.montserrat(
-                  color: const Color(0xFFE9AE5D),
+                  color: dorado,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -89,14 +92,19 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   }
 
   Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
+    final theme = Theme.of(context);
     return Container(
       width: 110,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C3C50),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 3))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3), 
+            blurRadius: 6, 
+            offset: const Offset(0, 3)
+          )
         ],
       ),
       child: Column(
@@ -106,7 +114,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
           Text(
             value,
             style: GoogleFonts.montserrat(
-              color: Colors.white,
+              color: theme.textTheme.bodyMedium?.color ?? Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -115,7 +123,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             title,
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
-              color: Colors.white70,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.white70,
               fontSize: 12,
             ),
           ),
@@ -125,35 +133,54 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   }
 
   Widget _buildLineChart() {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.white54;
+    
     return Container(
       height: 200,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C3C50),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: LineChart(
         LineChartData(
-          backgroundColor: const Color(0xFF1C3C50),
-          gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (_) => FlLine(color: Colors.white10, strokeWidth: 1)),
+          backgroundColor: theme.cardColor,
+          gridData: FlGridData(
+            show: true, 
+            drawVerticalLine: false, 
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: textColor.withValues(alpha: 0.3), 
+              strokeWidth: 1
+            )
+          ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 32, getTitlesWidget: (value, _) => Text('${value.toInt()}', style: const TextStyle(color: Colors.white54, fontSize: 10)))),
-            bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (value, _) {
-              switch (value.toInt()) {
-                case 1:
-                  return const Text('Lun', style: TextStyle(color: Colors.white54, fontSize: 10));
-                case 2:
-                  return const Text('Mar', style: TextStyle(color: Colors.white54, fontSize: 10));
-                case 3:
-                  return const Text('Mié', style: TextStyle(color: Colors.white54, fontSize: 10));
-                case 4:
-                  return const Text('Jue', style: TextStyle(color: Colors.white54, fontSize: 10));
-                case 5:
-                  return const Text('Vie', style: TextStyle(color: Colors.white54, fontSize: 10));
-              }
-              return const SizedBox.shrink();
-            })),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true, 
+                reservedSize: 32, 
+                getTitlesWidget: (value, _) => Text(
+                  '${value.toInt()}', 
+                  style: TextStyle(color: textColor, fontSize: 10)
+                )
+              )
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true, 
+                getTitlesWidget: (value, _) {
+                  switch (value.toInt()) {
+                    case 1: return Text('Lun', style: TextStyle(color: textColor, fontSize: 10));
+                    case 2: return Text('Mar', style: TextStyle(color: textColor, fontSize: 10));
+                    case 3: return Text('Mié', style: TextStyle(color: textColor, fontSize: 10));
+                    case 4: return Text('Jue', style: TextStyle(color: textColor, fontSize: 10));
+                    case 5: return Text('Vie', style: TextStyle(color: textColor, fontSize: 10));
+                  }
+                  return const SizedBox.shrink();
+                }
+              )
+            ),
           ),
           lineBarsData: [
             LineChartBarData(
@@ -164,10 +191,13 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
                 FlSpot(4, 2),
                 FlSpot(5, 4),
               ],
-              color: const Color(0xFFE9AE5D),
+              color: theme.colorScheme.secondary,
               isCurved: true,
               barWidth: 3,
-              belowBarData: BarAreaData(show: true, color: const Color(0xFFE9AE5D).withOpacity(0.2)),
+              belowBarData: BarAreaData(
+                show: true, 
+                color: theme.colorScheme.secondary.withValues(alpha: 0.2)
+              ),
             )
           ],
         ),
@@ -176,10 +206,11 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   }
 
   Widget _buildPieChart() {
+    final theme = Theme.of(context);
     return Container(
       height: 220,
       decoration: BoxDecoration(
-        color: const Color(0xFF1C3C50),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: PieChart(
@@ -190,21 +221,33 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
               value: 72,
               title: 'Seguras',
               radius: 60,
-              titleStyle: GoogleFonts.montserrat(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 12),
+              titleStyle: GoogleFonts.montserrat(
+                color: Colors.black87, 
+                fontWeight: FontWeight.bold, 
+                fontSize: 12
+              ),
             ),
             PieChartSectionData(
               color: Colors.amberAccent,
               value: 18,
               title: 'Riesgo medio',
               radius: 55,
-              titleStyle: GoogleFonts.montserrat(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10),
+              titleStyle: GoogleFonts.montserrat(
+                color: Colors.black87, 
+                fontWeight: FontWeight.bold, 
+                fontSize: 10
+              ),
             ),
             PieChartSectionData(
               color: Colors.redAccent,
               value: 10,
               title: 'Críticas',
               radius: 50,
-              titleStyle: GoogleFonts.montserrat(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10),
+              titleStyle: GoogleFonts.montserrat(
+                color: Colors.black87, 
+                fontWeight: FontWeight.bold, 
+                fontSize: 10
+              ),
             ),
           ],
           sectionsSpace: 2,
@@ -215,24 +258,33 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   }
 
   Widget _buildInsightCard(String text) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C3C50),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 3))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3), 
+            blurRadius: 6, 
+            offset: const Offset(0, 3)
+          )
         ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.insights, color: Color(0xFFE9AE5D)),
+          Icon(Icons.insights, color: theme.colorScheme.secondary),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.montserrat(color: Colors.white70, fontSize: 13, height: 1.4),
+              style: GoogleFonts.montserrat(
+                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.white70, 
+                fontSize: 13, 
+                height: 1.4
+              ),
             ),
           ),
         ],

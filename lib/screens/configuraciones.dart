@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/alert_helper.dart';
+import '../../main.dart';
 
 class ConfiguracionesPage extends StatefulWidget {
   const ConfiguracionesPage({super.key});
@@ -12,12 +13,12 @@ class ConfiguracionesPage extends StatefulWidget {
 class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
   double _radio = 100; // Valor inicial
   bool _notificacionesActivas = true;
-  bool _modoOscuro = false;
+  bool _modoOscuro = true;
   bool _cargando = true;
 
-  final Color azulOscuro = const Color(0xFF142535);
-  final Color dorado = const Color(0xFFE9AE5D);
-  final Color blanco = Colors.white;
+  // final Color azulOscuro = const Color(0xFF142535);
+  // final Color dorado = const Color(0xFFE9AE5D);
+  // final Color blanco = Colors.white;
 
   @override
   void initState() {
@@ -30,7 +31,8 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
     setState(() {
       _radio = prefs.getDouble('radio_alerta') ?? 100;
       _notificacionesActivas = prefs.getBool('notificaciones') ?? true;
-      _modoOscuro = prefs.getBool('modo_oscuro') ?? false;
+      _modoOscuro = prefs.getBool('modo_oscuro') ?? true;
+      darkModeNotifier.value = _modoOscuro;
       _cargando = false;
     });
   }
@@ -40,8 +42,11 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
     await prefs.setDouble('radio_alerta', _radio);
     await prefs.setBool('notificaciones', _notificacionesActivas);
     await prefs.setBool('modo_oscuro', _modoOscuro);
+    darkModeNotifier.value = _modoOscuro;
 
     if (mounted) {
+      final theme = Theme.of(context);
+      final dorado = theme.colorScheme.secondary;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: dorado,
@@ -54,20 +59,22 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
     }
   }
 
-  void _cerrarSesion() {
+  void _cerrarSesion(BuildContext context) {
+    final theme = Theme.of(context);
+    final dorado = theme.colorScheme.secondary;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: azulOscuro,
+        backgroundColor: theme.scaffoldBackgroundColor,
         title: Text("Cerrar sesión", style: TextStyle(color: dorado)),
-        content: const Text(
+        content: Text(
           "¿Seguro que deseas cerrar sesión?",
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancelar", style: TextStyle(color: Colors.white70)),
+            child: Text("Cancelar", style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: dorado),
@@ -87,20 +94,33 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
   @override
   Widget build(BuildContext context) {
     if (_cargando) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Colors.amber)),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.secondary
+          )
+        ),
       );
     }
 
+    final theme = Theme.of(context);
+    final dorado = theme.colorScheme.secondary;
+    
     return Scaffold(
-      backgroundColor: azulOscuro,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: azulOscuro,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        title: Text('Configuraciones',
-            style: TextStyle(color: dorado, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Configuraciones',
+          style: theme.appBarTheme.titleTextStyle ?? TextStyle(
+            color: dorado, 
+            fontWeight: FontWeight.bold
+          )
+        ),
         centerTitle: true,
-        iconTheme: IconThemeData(color: dorado),
+        iconTheme: theme.appBarTheme.iconTheme ?? IconThemeData(color: dorado),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -110,7 +130,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
             // Encabezado del usuario
             Container(
               decoration: BoxDecoration(
-                color: dorado.withOpacity(0.1),
+                color: dorado.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.all(20),
@@ -123,14 +143,22 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                   const SizedBox(width: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text("Usuario ZonAlert",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
-                      Text("usuario@correo.com",
-                          style: TextStyle(color: Colors.white70, fontSize: 14)),
+                    children: [
+                      Text(
+                        "Usuario ZonAlert",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color ?? Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                      Text(
+                        "usuario@correo.com",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
+                          fontSize: 14
+                        )
+                      ),
                     ],
                   )
                 ],
@@ -159,7 +187,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                   ),
                   Text(
                     "${_radio.round()} metros",
-                    style: TextStyle(color: blanco),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black),
                   ),
                 ],
               ),
@@ -172,15 +200,26 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
               title: "Notificaciones",
               icon: Icons.notifications_active,
               content: SwitchListTile(
-                activeColor: dorado,
-                title: const Text("Activar notificaciones",
-                    style: TextStyle(color: Colors.white)),
+                activeThumbColor: dorado,
+                activeTrackColor: dorado.withValues(alpha: 0.5),
+                inactiveThumbColor: theme.brightness == Brightness.dark 
+                    ? Colors.grey.shade400 
+                    : Colors.grey.shade600,
+                inactiveTrackColor: theme.brightness == Brightness.dark 
+                    ? Colors.grey.shade700 
+                    : Colors.grey.shade300,
+                title: Text(
+                  "Activar notificaciones",
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
+                ),
                 value: _notificacionesActivas,
                 onChanged: (value) async {
                   setState(() => _notificacionesActivas = value);
                   if (value) {
                     await AlertHelper.showInfoAlert(
-                        'ZonAlert', 'Notificaciones activadas correctamente');
+                      'ZonAlert', 
+                      'Notificaciones activadas correctamente'
+                    );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Notificaciones desactivadas')),
@@ -197,12 +236,24 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
               title: "Modo oscuro",
               icon: Icons.dark_mode,
               content: SwitchListTile(
-                activeColor: dorado,
-                title:
-                    const Text("Activar modo oscuro", style: TextStyle(color: Colors.white)),
+                activeThumbColor: dorado,
+                activeTrackColor: dorado.withValues(alpha: 0.5),
+                inactiveThumbColor: theme.brightness == Brightness.dark 
+                    ? Colors.grey.shade400 
+                    : Colors.grey.shade600,
+                inactiveTrackColor: theme.brightness == Brightness.dark 
+                    ? Colors.grey.shade700 
+                    : Colors.grey.shade300,
+                title: Text(
+                  "Activar modo oscuro", 
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
+                ),
                 value: _modoOscuro,
                 onChanged: (value) {
-                  setState(() => _modoOscuro = value);
+                  setState(() {
+                    _modoOscuro = value;
+                    darkModeNotifier.value = value;
+                  });
                 },
               ),
             ),
@@ -221,7 +272,9 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                       backgroundColor: dorado,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
+                        horizontal: 40, 
+                        vertical: 15
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -229,14 +282,21 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                   ),
                   const SizedBox(height: 20),
                   OutlinedButton.icon(
-                    onPressed: _cerrarSesion,
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                    label: const Text('Cerrar sesión',
-                        style: TextStyle(color: Colors.white)),
+                    onPressed: () => _cerrarSesion(context),
+                    icon: Icon(
+                      Icons.logout, 
+                      color: theme.textTheme.bodyMedium?.color ?? Colors.black
+                    ),
+                    label: Text(
+                      'Cerrar sesión',
+                      style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: dorado, width: 2),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
+                        horizontal: 40, 
+                        vertical: 15
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -256,13 +316,15 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
     required IconData icon,
     required Widget content,
   }) {
+    final theme = Theme.of(context);
+    final dorado = theme.colorScheme.secondary;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1C3C50),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )

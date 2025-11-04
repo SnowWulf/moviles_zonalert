@@ -33,11 +33,11 @@ class _InicioPageState extends State<InicioPage> {
 
   @override
   Widget build(BuildContext context) {
-    const azulOscuro = Color(0xFF142535);
-    const dorado = Color(0xFFE9AE5D);
+    final theme = Theme.of(context);
+    final dorado = theme.colorScheme.secondary;
 
     return Scaffold(
-      backgroundColor: azulOscuro,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -57,18 +57,18 @@ class _InicioPageState extends State<InicioPage> {
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             "Bienvenido 👋",
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54,
                               fontSize: 16,
                             ),
                           ),
                           Text(
                             "Usuario de ZonAlert",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
                             ),
@@ -79,8 +79,10 @@ class _InicioPageState extends State<InicioPage> {
                   ),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.notifications_none_rounded,
-                        color: Colors.white),
+                    icon: Icon(
+                      Icons.notifications_none_rounded,
+                      color: theme.textTheme.bodyMedium?.color ?? Colors.black,
+                    ),
                   ),
                 ],
               ),
@@ -92,10 +94,10 @@ class _InicioPageState extends State<InicioPage> {
                 opacity: _cargado ? 1 : 0,
                 duration: const Duration(milliseconds: 600),
                 child: _cargado
-                    ? _buildGraficaSeguridad(resumenZonas, dorado)
-                    : const Center(
+                    ? _buildGraficaSeguridad(resumenZonas, dorado, theme)
+                    : Center(
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: dorado,
                         ),
                       ),
               ),
@@ -103,10 +105,10 @@ class _InicioPageState extends State<InicioPage> {
               const SizedBox(height: 40),
 
               // Noticias / Alertas de la ciudad
-              const Text(
+              Text(
                 "Noticias de tu zona",
                 style: TextStyle(
-                    color: Colors.white,
+                    color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                     fontSize: 22,
                     fontWeight: FontWeight.bold),
               ),
@@ -136,7 +138,7 @@ class _InicioPageState extends State<InicioPage> {
     );
   }
 
-  Widget _buildGraficaSeguridad(Map<String, int> resumen, Color dorado) {
+  Widget _buildGraficaSeguridad(Map<String, int> resumen, Color dorado, ThemeData theme) {
     final total = resumen.values.reduce((a, b) => a + b);
     final seguras = resumen['seguras']! / total;
     final regulares = resumen['regulares']! / total;
@@ -152,7 +154,7 @@ class _InicioPageState extends State<InicioPage> {
             child: CircularProgressIndicator(
               value: seguras,
               strokeWidth: 16,
-              backgroundColor: Colors.white12,
+              backgroundColor: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2) ?? Colors.grey.withValues(alpha: 0.3),
               color: Colors.greenAccent,
             ),
           ),
@@ -179,9 +181,12 @@ class _InicioPageState extends State<InicioPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 "Resumen",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
+                  fontSize: 16
+                ),
               ),
               Text(
                 "$total zonas",
@@ -202,11 +207,12 @@ class _InicioPageState extends State<InicioPage> {
     required String descripcion,
     required Color color,
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
+        color: Color.fromRGBO((color.r * 255).round(), (color.g * 255).round(), (color.b * 255).round(), 0.15),
+        border: Border.all(color: Color.fromRGBO((color.r * 255).round(), (color.g * 255).round(), (color.b * 255).round(), 0.5), width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -223,7 +229,7 @@ class _InicioPageState extends State<InicioPage> {
           const SizedBox(height: 6),
           Text(
             descripcion,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, fontSize: 14),
           ),
         ],
       ),
