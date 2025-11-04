@@ -3,6 +3,7 @@ import 'mapa.dart';
 import 'datos.dart';
 import 'inicio.dart';
 import 'configuraciones.dart';
+import '../l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: PageView(
@@ -61,22 +63,22 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: theme.bottomNavigationBarTheme.unselectedItemColor,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
+            icon: const Icon(Icons.home),
+            label: l10n.navHome,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
+            icon: const Icon(Icons.map),
+            label: l10n.navMap,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Datos',
+            icon: const Icon(Icons.analytics),
+            label: l10n.navData,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuración',
+            icon: const Icon(Icons.settings),
+            label: l10n.navSettings,
           ),
         ],
       ),

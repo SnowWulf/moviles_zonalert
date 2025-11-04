@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 
 class AnalisisZonasPage extends StatefulWidget {
   const AnalisisZonasPage({super.key});
@@ -14,13 +15,14 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
-          'Análisis de Zonas',
+          l10n.analysisTitle,
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             color: dorado,
@@ -37,7 +39,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Resumen de Seguridad',
+                l10n.securitySummary,
                 style: GoogleFonts.montserrat(
                   color: dorado,
                   fontSize: 20,
@@ -51,9 +53,9 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoCard('Zonas seguras', '72%', Icons.shield_outlined, Colors.greenAccent),
-                _buildInfoCard('Riesgo medio', '18%', Icons.warning_amber_rounded, Colors.amberAccent),
-                _buildInfoCard('Zonas críticas', '10%', Icons.dangerous_rounded, Colors.redAccent),
+                _buildInfoCard(l10n.safeZones, '72%', Icons.shield_outlined, Colors.greenAccent),
+                _buildInfoCard(l10n.mediumRiskZones, '18%', Icons.warning_amber_rounded, Colors.amberAccent),
+                _buildInfoCard(l10n.criticalZones, '10%', Icons.dangerous_rounded, Colors.redAccent),
               ],
             ),
             const SizedBox(height: 30),
@@ -63,14 +65,14 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             const SizedBox(height: 30),
 
             // Gráfico circular
-            _buildPieChart(),
+            _buildPieChart(l10n),
             const SizedBox(height: 30),
 
             // Noticias / insights del modelo
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Insights del Análisis IA',
+                l10n.aiInsights,
                 style: GoogleFonts.montserrat(
                   color: dorado,
                   fontSize: 20,
@@ -79,12 +81,8 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildInsightCard(
-              'El aumento del 15% en reportes nocturnos en el norte sugiere baja iluminación en vías principales.',
-            ),
-            _buildInsightCard(
-              'Las zonas cercanas a parques registran una disminución del 8% en incidentes tras mayor presencia policial.',
-            ),
+            _buildInsightCard(l10n.insight1),
+            _buildInsightCard(l10n.insight2),
           ],
         ),
       ),
@@ -205,7 +203,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
     );
   }
 
-  Widget _buildPieChart() {
+  Widget _buildPieChart(AppLocalizations l10n) {
     final theme = Theme.of(context);
     return Container(
       height: 220,
@@ -219,7 +217,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             PieChartSectionData(
               color: Colors.greenAccent,
               value: 72,
-              title: 'Seguras',
+              title: l10n.safeZones,
               radius: 60,
               titleStyle: GoogleFonts.montserrat(
                 color: Colors.black87, 
@@ -230,7 +228,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             PieChartSectionData(
               color: Colors.amberAccent,
               value: 18,
-              title: 'Riesgo medio',
+              title: l10n.mediumRiskZones,
               radius: 55,
               titleStyle: GoogleFonts.montserrat(
                 color: Colors.black87, 
@@ -241,7 +239,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             PieChartSectionData(
               color: Colors.redAccent,
               value: 10,
-              title: 'Críticas',
+              title: l10n.criticalZones,
               radius: 50,
               titleStyle: GoogleFonts.montserrat(
                 color: Colors.black87, 

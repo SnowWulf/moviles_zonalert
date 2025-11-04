@@ -8,6 +8,7 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/utils/notification_settings.dart';
+import '../l10n/app_localizations.dart';
 
 // Clase para almacenar información de cada marcador
 class MarcadorInfo {
@@ -470,6 +471,7 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       appBar: AppBar(
@@ -565,6 +567,7 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
                     child: Icon(Icons.my_location, color: theme.scaffoldBackgroundColor),
                   ),
                 ),
+                // texto de niveles de riesgo con traducciones
                 Positioned(
                   top: 10,
                   left: 10,
@@ -575,12 +578,12 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
                       border: Border.all(color: dorado, width: 1),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('🟢 Bajo riesgo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        Text('🟡 Riesgo medio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        Text('🔴 Alto riesgo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(l10n.lowRisk, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(l10n.mediumRisk, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text(l10n.highRisk, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),

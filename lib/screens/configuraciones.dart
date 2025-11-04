@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/alert_helper.dart';
 import '../../main.dart';
+import '../l10n/app_localizations.dart';
 
 class ConfiguracionesPage extends StatefulWidget {
   const ConfiguracionesPage({super.key});
@@ -14,11 +15,8 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
   double _radio = 100; // Valor inicial
   bool _notificacionesActivas = true;
   bool _modoOscuro = true;
+  String _idioma = 'es'; // español por defecto
   bool _cargando = true;
-
-  // final Color azulOscuro = const Color(0xFF142535);
-  // final Color dorado = const Color(0xFFE9AE5D);
-  // final Color blanco = Colors.white;
 
   @override
   void initState() {
@@ -32,6 +30,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
       _radio = prefs.getDouble('radio_alerta') ?? 100;
       _notificacionesActivas = prefs.getBool('notificaciones') ?? true;
       _modoOscuro = prefs.getBool('modo_oscuro') ?? true;
+      _idioma = prefs.getString('language') ?? 'es';
       darkModeNotifier.value = _modoOscuro;
       _cargando = false;
     });
@@ -42,17 +41,20 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
     await prefs.setDouble('radio_alerta', _radio);
     await prefs.setBool('notificaciones', _notificacionesActivas);
     await prefs.setBool('modo_oscuro', _modoOscuro);
+    await prefs.setString('language', _idioma);
     darkModeNotifier.value = _modoOscuro;
+    localeNotifier.value = Locale(_idioma, '');
 
     if (mounted) {
       final theme = Theme.of(context);
       final dorado = theme.colorScheme.secondary;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: dorado,
-          content: const Text(
-            'Configuraciones guardadas ✅',
-            style: TextStyle(color: Colors.black87),
+          content: Text(
+            l10n.settingsSaved,
+            style: const TextStyle(color: Colors.black87),
           ),
         ),
       );
@@ -62,29 +64,30 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
   void _cerrarSesion(BuildContext context) {
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: theme.scaffoldBackgroundColor,
-        title: Text("Cerrar sesión", style: TextStyle(color: dorado)),
+        title: Text(l10n.logout, style: TextStyle(color: dorado)),
         content: Text(
-          "¿Seguro que deseas cerrar sesión?",
+          l10n.logoutConfirm,
           style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancelar", style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54)),
+            child: Text(l10n.cancel, style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: dorado),
             onPressed: () {
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Sesión cerrada exitosamente.")),
+                SnackBar(content: Text(l10n.logoutSuccess)),
               );
             },
-            child: const Text("Cerrar sesión", style: TextStyle(color: Colors.black)),
+            child: Text(l10n.logout, style: const TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -106,6 +109,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
 
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
+    final l10n = AppLocalizations.of(context);
     
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -113,7 +117,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         title: Text(
-          'Configuraciones',
+          l10n.settings,
           style: theme.appBarTheme.titleTextStyle ?? TextStyle(
             color: dorado, 
             fontWeight: FontWeight.bold
@@ -145,7 +149,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Usuario ZonAlert",
+                        l10n.user,
                         style: TextStyle(
                           color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                           fontSize: 20,
@@ -153,7 +157,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                         )
                       ),
                       Text(
-                        "usuario@correo.com",
+                        l10n.userEmail,
                         style: TextStyle(
                           color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
                           fontSize: 14
@@ -168,7 +172,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
 
             // Tarjeta: Radio de alerta
             _buildCard(
-              title: "Radio de alerta",
+              title: l10n.alertRadius,
               icon: Icons.radar,
               content: Column(
                 children: [
@@ -186,7 +190,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                     },
                   ),
                   Text(
-                    "${_radio.round()} metros",
+                    "${_radio.round()} ${l10n.meters}",
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black),
                   ),
                 ],
@@ -197,7 +201,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
 
             // Tarjeta: Notificaciones
             _buildCard(
-              title: "Notificaciones",
+              title: l10n.notifications,
               icon: Icons.notifications_active,
               content: SwitchListTile(
                 activeThumbColor: dorado,
@@ -209,7 +213,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                     ? Colors.grey.shade700 
                     : Colors.grey.shade300,
                 title: Text(
-                  "Activar notificaciones",
+                  l10n.enableNotifications,
                   style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
                 ),
                 value: _notificacionesActivas,
@@ -218,11 +222,11 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                   if (value) {
                     await AlertHelper.showInfoAlert(
                       'ZonAlert', 
-                      'Notificaciones activadas correctamente'
+                      l10n.notificationsEnabled
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Notificaciones desactivadas')),
+                      SnackBar(content: Text(l10n.notificationsDisabled)),
                     );
                   }
                 },
@@ -233,7 +237,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
 
             // Tarjeta: Modo oscuro
             _buildCard(
-              title: "Modo oscuro",
+              title: l10n.darkMode,
               icon: Icons.dark_mode,
               content: SwitchListTile(
                 activeThumbColor: dorado,
@@ -245,7 +249,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                     ? Colors.grey.shade700 
                     : Colors.grey.shade300,
                 title: Text(
-                  "Activar modo oscuro", 
+                  l10n.enableDarkMode, 
                   style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
                 ),
                 value: _modoOscuro,
@@ -258,6 +262,63 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // Tarjeta: Idioma
+            _buildCard(
+              title: l10n.language,
+              icon: Icons.language,
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.selectLanguage,
+                    style: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54,
+                      fontSize: 14
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButton<String>(
+                    value: _idioma,
+                    isExpanded: true,
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black),
+                    dropdownColor: theme.cardColor,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'es',
+                        child: Row(
+                          children: [
+                            const Text('🇪🇸', style: TextStyle(fontSize: 24)),
+                            const SizedBox(width: 10),
+                            Text(l10n.spanish),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Row(
+                          children: [
+                            const Text('🇺🇸', style: TextStyle(fontSize: 24)),
+                            const SizedBox(width: 10),
+                            Text(l10n.english),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _idioma = value;
+                          localeNotifier.value = Locale(value, '');
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 30),
 
             // Botones de acción
@@ -267,7 +328,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                   ElevatedButton.icon(
                     onPressed: _guardarConfiguraciones,
                     icon: const Icon(Icons.save),
-                    label: const Text('Guardar cambios'),
+                    label: Text(l10n.saveChanges),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: dorado,
                       foregroundColor: Colors.black,
@@ -288,7 +349,7 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
                       color: theme.textTheme.bodyMedium?.color ?? Colors.black
                     ),
                     label: Text(
-                      'Cerrar sesión',
+                      l10n.logout,
                       style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black)
                     ),
                     style: OutlinedButton.styleFrom(

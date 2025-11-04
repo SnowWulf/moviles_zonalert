@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' show Random;
+import '../l10n/app_localizations.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -35,6 +36,7 @@ class _InicioPageState extends State<InicioPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -59,14 +61,14 @@ class _InicioPageState extends State<InicioPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Bienvenido 👋",
+                            l10n.welcome,
                             style: TextStyle(
                               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54,
                               fontSize: 16,
                             ),
                           ),
                           Text(
-                            "Usuario de ZonAlert",
+                            l10n.user,
                             style: TextStyle(
                               color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                               fontWeight: FontWeight.bold,
@@ -94,19 +96,15 @@ class _InicioPageState extends State<InicioPage> {
                 opacity: _cargado ? 1 : 0,
                 duration: const Duration(milliseconds: 600),
                 child: _cargado
-                    ? _buildGraficaSeguridad(resumenZonas, dorado, theme)
-                    : Center(
-                        child: CircularProgressIndicator(
-                          color: dorado,
-                        ),
-                      ),
+                    ? _buildGraficaSeguridad(resumenZonas, dorado, theme, l10n)
+                    : Center(child: CircularProgressIndicator(color: dorado)),
               ),
 
               const SizedBox(height: 40),
 
               // Noticias / Alertas de la ciudad
               Text(
-                "Noticias de tu zona",
+                l10n.newsTitle,
                 style: TextStyle(
                     color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                     fontSize: 22,
@@ -114,21 +112,18 @@ class _InicioPageState extends State<InicioPage> {
               ),
               const SizedBox(height: 16),
               _buildNoticia(
-                titulo: "📍 Nueva zona segura detectada en el centro",
-                descripcion:
-                    "El sistema registró mejoras en la seguridad del Parque Nariño y sus alrededores.",
+                titulo: l10n.news1Title,
+                descripcion: l10n.news1Desc,
                 color: dorado,
               ),
               _buildNoticia(
-                titulo: "⚠️ Aumento de incidentes en el barrio Obrero",
-                descripcion:
-                    "Se reportaron 3 alertas recientes. Evita transitar de noche por la zona.",
+                titulo: l10n.news2Title,
+                descripcion: l10n.news2Desc,
                 color: Colors.redAccent,
               ),
               _buildNoticia(
-                titulo: "🚓 Patrullajes activos en Avenida Panamericana",
-                descripcion:
-                    "La policía incrementó la vigilancia en los accesos principales.",
+                titulo: l10n.news3Title,
+                descripcion: l10n.news3Desc,
                 color: Colors.greenAccent.shade400,
               ),
             ],
@@ -138,7 +133,7 @@ class _InicioPageState extends State<InicioPage> {
     );
   }
 
-  Widget _buildGraficaSeguridad(Map<String, int> resumen, Color dorado, ThemeData theme) {
+  Widget _buildGraficaSeguridad(Map<String, int> resumen, Color dorado, ThemeData theme, AppLocalizations l10n) {
     final total = resumen.values.reduce((a, b) => a + b);
     final seguras = resumen['seguras']! / total;
     final regulares = resumen['regulares']! / total;
@@ -182,14 +177,14 @@ class _InicioPageState extends State<InicioPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Resumen",
+                l10n.summary,
                 style: TextStyle(
                   color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
                   fontSize: 16
                 ),
               ),
               Text(
-                "$total zonas",
+                "$total ${l10n.zones}",
                 style: TextStyle(
                     color: dorado,
                     fontSize: 24,
