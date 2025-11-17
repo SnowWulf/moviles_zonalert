@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'mapa.dart';
-import 'datos.dart';
 import 'inicio.dart';
+import 'datos.dart';
 import 'configuraciones.dart';
 import '../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../providers/zonas_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,16 +18,33 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   late PageController _pageController;
 
-  final List<Widget> _pages = const [
-    InicioPage(),
-    MapaPage(),
-    AnalisisZonasPage(),
-    ConfiguracionesPage(),
-  ];
+  /// NO definimos _pages aquí porque depende del provider
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+
+    final zonas = context.read<ZonasProvider>();
+
+    _pages = [
+      const InicioPage(),
+
+      /// 🔥 Mapa conectado con provider
+      MapaPage(
+        onDataChanged: (marcadores, conteos) {
+          zonas.actualizarZonas(
+            nuevasSeguras: conteos['seguras']!,
+            nuevosRiesgoMedio: conteos['riesgoMedio']!,
+            nuevasPeligrosas: conteos['peligrosas']!,
+          );
+        },
+      ),
+
+      const AnalisisZonasPage(),
+      const ConfiguracionesPage(),
+    ];
+
     _pageController = PageController(initialPage: _selectedIndex);
   }
 
@@ -52,7 +71,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // evita deslizar manual
+        physics: const NeverScrollableScrollPhysics(),
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
