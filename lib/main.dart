@@ -5,6 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
+//Para datos
+import 'package:provider/provider.dart';
+import 'providers/zonas_provider.dart';
+
 // Notificador global para el modo oscuro
 final ValueNotifier<bool> darkModeNotifier = ValueNotifier(true);
 // Notificador global para el idioma
@@ -23,7 +27,13 @@ void main() async {
     localeNotifier.value = Locale(savedLanguage, '');
   }
   
-  runApp(const ZonAlertApp());
+  runApp(
+    //AÑADIMOS el Provider SIN romper el resto
+    ChangeNotifierProvider(
+      create: (_) => ZonasProvider(),
+      child: const ZonAlertApp(),
+    ),
+  );
 }
 
 class ZonAlertApp extends StatelessWidget {
@@ -121,6 +131,7 @@ class ZonAlertApp extends StatelessWidget {
                 ).copyWith(secondary: const Color(0xFFE9AE5D)),
               ),
               themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+              
               home: const SplashScreen(),
             );
           },

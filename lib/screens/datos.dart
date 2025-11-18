@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../providers/zonas_provider.dart';
+import '../services/ia_service.dart';
 
 class AnalisisZonasPage extends StatefulWidget {
   const AnalisisZonasPage({super.key});
@@ -16,7 +19,8 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
     final theme = Theme.of(context);
     final dorado = theme.colorScheme.secondary;
     final l10n = AppLocalizations.of(context);
-    
+    final zonas = context.watch<ZonasProvider>();
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -53,9 +57,27 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoCard(l10n.safeZones, '72%', Icons.shield_outlined, Colors.greenAccent),
-                _buildInfoCard(l10n.mediumRiskZones, '18%', Icons.warning_amber_rounded, Colors.amberAccent),
-                _buildInfoCard(l10n.criticalZones, '10%', Icons.dangerous_rounded, Colors.redAccent),
+                _buildInfoCard(
+                  l10n.safeZones,
+                  '${zonas.porcentajeSeguras.toStringAsFixed(1)}%',
+                  Icons.shield_outlined,
+                  Colors.greenAccent,
+                ),
+                
+                _buildInfoCard(
+                  l10n.mediumRiskZones,
+                  '${zonas.porcentajeRiesgoMedio.toStringAsFixed(1)}%',
+                  Icons.warning_amber_rounded,
+                  Colors.amberAccent,
+                ),
+                
+                _buildInfoCard(
+                  l10n.criticalZones,
+                  '${zonas.porcentajePeligrosas.toStringAsFixed(1)}%',
+                  Icons.dangerous_rounded,
+                  Colors.redAccent,
+                ),
+                
               ],
             ),
             const SizedBox(height: 30),
@@ -81,8 +103,37 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildInsightCard(l10n.insight1),
-            _buildInsightCard(l10n.insight2),
+            (zonas.ultimoInsight == null || zonas.ultimoInsight!.isEmpty)
+              ? _buildInsightCard("Pulsa el botón para generar un análisis con IA.")
+              : _buildInsightCard(zonas.ultimoInsight!),
+            
+            const SizedBox(height: 10),
+
+            ElevatedButton.icon(
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text("Generar Insight con IA"),
+              onPressed: () async {
+                final zonas = context.read<ZonasProvider>();
+            
+                final prompt = """
+            Analiza datos de seguridad urbana:
+            
+            Seguras: ${zonas.seguras}
+            Riesgo medio: ${zonas.riesgoMedio}
+            Peligrosas: ${zonas.peligrosas}
+            
+            Reportes semanales: ${zonas.reportesPorDia}
+            
+            Genera un insight breve, claro y útil para el usuario.
+            """;
+            
+                final ia = IaService();
+                final respuesta = await ia.generarInsight(prompt);
+            
+                zonas.actualizarInsight(respuesta);
+              },
+            ),
+            
           ],
         ),
       ),
@@ -133,7 +184,8 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   Widget _buildLineChart() {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.white54;
-    
+    final zonas = context.watch<ZonasProvider>();
+
     return Container(
       height: 200,
       padding: const EdgeInsets.all(16),
@@ -182,13 +234,12 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
           ),
           lineBarsData: [
             LineChartBarData(
-              spots: const [
-                FlSpot(1, 3),
-                FlSpot(2, 2.5),
-                FlSpot(3, 3.8),
-                FlSpot(4, 2),
-                FlSpot(5, 4),
-              ],
+              spots: List.generate(7, (index) {
+              final dia = index + 1; // eje X (1 a 7)
+              final cantidad = zonas.reportesPorDia[dia]!.toDouble(); // eje Y
+              return FlSpot(dia.toDouble(), cantidad);
+            }),
+        
               color: theme.colorScheme.secondary,
               isCurved: true,
               barWidth: 3,
@@ -204,6 +255,7 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
   }
 
   Widget _buildPieChart(AppLocalizations l10n) {
+    final zonas = context.watch<ZonasProvider>();
     final theme = Theme.of(context);
     return Container(
       height: 220,
@@ -216,38 +268,39 @@ class _AnalisisZonasPageState extends State<AnalisisZonasPage> {
           sections: [
             PieChartSectionData(
               color: Colors.greenAccent,
-              value: 72,
+              value: zonas.porcentajeSeguras,
               title: l10n.safeZones,
               radius: 60,
               titleStyle: GoogleFonts.montserrat(
-                color: Colors.black87, 
-                fontWeight: FontWeight.bold, 
-                fontSize: 12
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
             ),
             PieChartSectionData(
               color: Colors.amberAccent,
-              value: 18,
+              value: zonas.porcentajeRiesgoMedio,
               title: l10n.mediumRiskZones,
               radius: 55,
               titleStyle: GoogleFonts.montserrat(
-                color: Colors.black87, 
-                fontWeight: FontWeight.bold, 
-                fontSize: 10
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
               ),
             ),
             PieChartSectionData(
               color: Colors.redAccent,
-              value: 10,
+              value: zonas.porcentajePeligrosas,
               title: l10n.criticalZones,
               radius: 50,
               titleStyle: GoogleFonts.montserrat(
-                color: Colors.black87, 
-                fontWeight: FontWeight.bold, 
-                fontSize: 10
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
               ),
             ),
-          ],
+          ],          
+
           sectionsSpace: 2,
           centerSpaceRadius: 40,
         ),

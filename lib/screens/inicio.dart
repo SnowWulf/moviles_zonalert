@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math' show Random;
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../l10n/app_localizations.dart';
+import '../utils/config.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -13,24 +16,74 @@ class _InicioPageState extends State<InicioPage> {
   late Map<String, int> resumenZonas;
   bool _cargado = false;
 
+  bool _cargandoNoticias = true;
+  List<Map<String, dynamic>> noticias = [];
+
   @override
   void initState() {
     super.initState();
     _cargarDatos();
+    _cargarNoticias();
   }
 
+  /// Simula la carga de datos de seguridad
   Future<void> _cargarDatos() async {
-    await Future.delayed(const Duration(milliseconds: 800)); // Simula carga
+  await Future.delayed(const Duration(milliseconds: 800));
+
+  if (!mounted) return;
+
+  setState(() {
+    final random = Random();
+    resumenZonas = {
+      'seguras': random.nextInt(10) + 5,
+      'regulares': random.nextInt(8) + 3,
+      'peligrosas': random.nextInt(6) + 1,
+    };
+    _cargado = true;
+  });
+}
+
+
+  /// Carga las noticias desde tu Worker
+  Future<void> _cargarNoticias() async {
+  try {
+    final url = Uri.parse(Config.newsUrl);
+    final response = await http.get(url);
+
+    if (!mounted) return;
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['status'] == 'success') {
+        if (!mounted) return;
+        setState(() {
+          noticias = List<Map<String, dynamic>>.from(data['articles']);
+          _cargandoNoticias = false;
+        });
+      } else {
+        if (!mounted) return;
+        setState(() {
+          noticias = [];
+          _cargandoNoticias = false;
+        });
+      }
+    } else {
+      if (!mounted) return;
+      setState(() {
+        noticias = [];
+        _cargandoNoticias = false;
+      });
+    }
+  } catch (e) {
+    if (!mounted) return;
     setState(() {
-      final random = Random();
-      resumenZonas = {
-        'seguras': random.nextInt(10) + 5,
-        'regulares': random.nextInt(8) + 3,
-        'peligrosas': random.nextInt(6) + 1,
-      };
-      _cargado = true;
+      noticias = [];
+      _cargandoNoticias = false;
     });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +116,7 @@ class _InicioPageState extends State<InicioPage> {
                           Text(
                             l10n.welcome,
                             style: TextStyle(
-                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54,
+                              color: theme.textTheme.bodyMedium?.color?.withAlpha(180) ?? Colors.black54,
                               fontSize: 16,
                             ),
                           ),
@@ -111,21 +164,23 @@ class _InicioPageState extends State<InicioPage> {
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              _buildNoticia(
-                titulo: l10n.news1Title,
-                descripcion: l10n.news1Desc,
-                color: dorado,
-              ),
-              _buildNoticia(
-                titulo: l10n.news2Title,
-                descripcion: l10n.news2Desc,
-                color: Colors.redAccent,
-              ),
-              _buildNoticia(
-                titulo: l10n.news3Title,
-                descripcion: l10n.news3Desc,
-                color: Colors.greenAccent.shade400,
-              ),
+
+              _cargandoNoticias
+                  ? Center(child: CircularProgressIndicator(color: dorado))
+                  : noticias.isEmpty
+                      ? Text(
+                          'No hay noticias disponibles.',
+                          style: TextStyle(color: theme.textTheme.bodyMedium?.color ?? Colors.black54),
+                        )
+                      : Column(
+                          children: noticias.map((article) {
+                            return _buildNoticia(
+                              titulo: article['title'] ?? '',
+                              descripcion: article['description'] ?? '',
+                              color: dorado,
+                            );
+                          }).toList(),
+                        ),
             ],
           ),
         ),
@@ -149,7 +204,7 @@ class _InicioPageState extends State<InicioPage> {
             child: CircularProgressIndicator(
               value: seguras,
               strokeWidth: 16,
-              backgroundColor: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.2) ?? Colors.grey.withValues(alpha: 0.3),
+              backgroundColor: theme.textTheme.bodyMedium?.color?.withAlpha(50) ?? Colors.grey.withAlpha(80),
               color: Colors.greenAccent,
             ),
           ),
@@ -179,8 +234,8 @@ class _InicioPageState extends State<InicioPage> {
               Text(
                 l10n.summary,
                 style: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
-                  fontSize: 16
+                  color: theme.textTheme.bodyMedium?.color?.withAlpha(180) ?? Colors.black54,
+                  fontSize: 16,
                 ),
               ),
               Text(
@@ -206,8 +261,8 @@ class _InicioPageState extends State<InicioPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Color.fromRGBO((color.r * 255).round(), (color.g * 255).round(), (color.b * 255).round(), 0.15),
-        border: Border.all(color: Color.fromRGBO((color.r * 255).round(), (color.g * 255).round(), (color.b * 255).round(), 0.5), width: 1),
+        color: Color.fromRGBO((color.red), (color.green), (color.blue), 0.15),
+        border: Border.all(color: Color.fromRGBO((color.red), (color.green), (color.blue), 0.5), width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -224,7 +279,7 @@ class _InicioPageState extends State<InicioPage> {
           const SizedBox(height: 6),
           Text(
             descripcion,
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, fontSize: 14),
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withAlpha(180) ?? Colors.black54, fontSize: 14),
           ),
         ],
       ),

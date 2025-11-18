@@ -9,31 +9,27 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/utils/notification_settings.dart';
 import '../l10n/app_localizations.dart';
+import '../models/marcador_info.dart';
+import 'package:provider/provider.dart';
+import '../providers/zonas_provider.dart';
 
-// Clase para almacenar información de cada marcador
-class MarcadorInfo {
-  Marker marker;
-  String tipoExperiencia;
-  String experiencia;
-  String descripcion;
 
-  MarcadorInfo({
-    required this.marker,
-    required this.tipoExperiencia,
-    required this.experiencia,
-    required this.descripcion,
-  });
-}
+typedef OnDataChangedCallback = void Function(
+  Map<String, MarcadorInfo> marcadores,
+  Map<String, int> zonas,
+);
 
 // Página del mapa
 class MapaPage extends StatefulWidget {
-  final Function(Map<String, MarcadorInfo>, List<List<LatLng>>)? onDataChanged;
+  
+  final OnDataChangedCallback? onDataChanged;
   const MapaPage({super.key, this.onDataChanged});
 
   @override
   State<MapaPage> createState() => _MapaPageState();
 }
 
+//Disparador de alertas
 class AlertHelper {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -109,43 +105,58 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
   }
 
   Future<void> _iniciarSeguimientoUbicacion() async {
-    bool servicio = await Geolocator.isLocationServiceEnabled();
-    if (!servicio) return;
-  
-    LocationPermission permiso = await Geolocator.checkPermission();
-    if (permiso == LocationPermission.denied) {
-      permiso = await Geolocator.requestPermission();
-      if (permiso == LocationPermission.denied) return;
-    }
-    if (permiso == LocationPermission.deniedForever) return;
+  bool servicio = await Geolocator.isLocationServiceEnabled();
+  if (!servicio) return;
 
-    try {
-      final p = await Geolocator.getCurrentPosition();
-      setState(() {
-        _ubicacionActual = LatLng(p.latitude, p.longitude);
-      });
-    } catch (_) {}
-  
-    _posicionStream = Geolocator.getPositionStream(
+  LocationPermission permiso = await Geolocator.checkPermission();
+  if (permiso == LocationPermission.denied) {
+    permiso = await Geolocator.requestPermission();
+    if (permiso == LocationPermission.denied) return;
+  }
+  if (permiso == LocationPermission.deniedForever) return;
+
+  // ===============================
+  // PRIMERA UBICACIÓN SEGURA
+  // ===============================
+  try {
+    final p = await Geolocator.getCurrentPosition();
+    setState(() {
+      _ubicacionActual = LatLng(p.latitude, p.longitude);
+    });
+  } catch (_) {
+    return;  // Evita que siga si falla
+  }
+
+  // ===============================
+  // STREAM CON PREVENCIÓN DE NaN
+  // ===============================
+  _posicionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 5,
       ),
     ).listen((Position pos) {
-      final nueva = LatLng(pos.latitude, pos.longitude);
+      final nueva = LatLng(pos.latitude, pos.longitude);    
 
+      // Calcular distancia entre posiciones
       final double distancia = Distance().as(
         LengthUnit.Meter,
         _ubicacionActual,
         nueva,
-      );
+      );    
 
-      if (distancia < 3) return;
+      // Evitar NaN
+      if (distancia.isNaN) return;    
 
+      // Evitar micro-movimientos
+      if (distancia < 3) return;    
+
+      // Actualizar y verificar zonas
       setState(() => _ubicacionActual = nueva);
       _verificarProximidad(nueva);
-    });
-  }
+    });   
+
+}
     
   Future<void> _cargarConfiguracion() async {
     final prefs = await SharedPreferences.getInstance();
@@ -169,12 +180,22 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
     );
 
     _iniciarSeguimientoUbicacion();
+
+    double lerp(double a, double b, double t) => a + (b - a) * t;
     
     _compassSubscription = FlutterCompass.events!.listen((event) {
-      setState(() {
-        _currentHeading = event.heading ?? 0.0;
-      });
-    });
+     double? h = event.heading;
+
+     // Validar que no sea null ni NaN
+     if (h == null || h.isNaN) return;
+
+     // Convertir a double seguro
+     double heading = h % 360;
+
+     setState(() {
+       _currentHeading = lerp(_currentHeading, heading, 0.1); 
+     });
+  });
   }
 
   void _abrirDialogoMarcador({required LatLng posicion, String? idExistente}) {
@@ -459,12 +480,47 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
         descripcion: descripcion,
       );
     });
+    //Para el reporte diario
+    context.read<ZonasProvider>().registrarReporteHoy();
+    //para avisar de un cambio a providers:
+    _notificarCambios();
   }
 
   void _eliminarMarcador(String id) {
     setState(() {
       _marcadoresInfo.remove(id);
     });
+    _notificarCambios();
+  }
+  
+  void _notificarCambios() {
+    if (widget.onDataChanged != null) {
+      int seguras = _marcadoresInfo.values
+          .where((m) => m.tipoExperiencia.toLowerCase() == 'bueno')
+          .length;
+  
+      int riesgoMedio = _marcadoresInfo.values
+          .where((m) => m.tipoExperiencia.toLowerCase() == 'regular')
+          .length;
+  
+      int peligrosas = _marcadoresInfo.values
+          .where((m) => m.tipoExperiencia.toLowerCase() == 'malo')
+          .length;
+  
+      final conteos = {
+        'seguras': seguras,
+        'riesgoMedio': riesgoMedio,
+        'peligrosas': peligrosas,
+      };
+  
+      // DEBUG: imprimir en consola para verificar flujo
+      debugPrint('mapa.dart -> _notificarCambios: marcadores=${_marcadoresInfo.length}, conteos=$conteos');
+  
+      widget.onDataChanged!(
+        _marcadoresInfo,
+        conteos,
+      );
+    }
   }
 
   @override
@@ -543,13 +599,13 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
                           width: 40,
                           height: 40,
                           child: Transform.rotate(
-                            angle: -(_currentHeading * (3.1416 / 180)),
-                            child: Icon(
-                              Icons.navigation,
-                              color: dorado,
-                              size: 40,
-                            ),
+                          angle: (_currentHeading * (3.141592 / 180)) * -1,
+                          child: Icon(
+                            Icons.navigation,
+                            color: dorado,
+                            size: 40,
                           ),
+                        ),
                         ),
                         ..._marcadoresInfo.values.map((e) => e.marker),
                       ],
@@ -608,7 +664,7 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
       ),
     );
   }
-
+  
   Future<void> _verificarProximidad(LatLng posicion) async {
     final notificacionesActivas = await NotificationSettings.areNotificationsEnabled();
 
