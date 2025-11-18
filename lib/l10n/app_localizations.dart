@@ -68,6 +68,22 @@ class AppLocalizations {
   String get description => _isSpanish ? AppLocalizationsEs.description : AppLocalizationsEn.description;
   String get addDetails => _isSpanish ? AppLocalizationsEs.addDetails : AppLocalizationsEn.addDetails;
   String get addPhoto => _isSpanish ? AppLocalizationsEs.addPhoto : AppLocalizationsEn.addPhoto;
+  String get markerInfo => _isSpanish ? AppLocalizationsEs.markerInfo : AppLocalizationsEn.markerInfo;
+  String get type => _isSpanish ? AppLocalizationsEs.type : AppLocalizationsEn.type;
+  String get experience => _isSpanish ? AppLocalizationsEs.experience : AppLocalizationsEn.experience;
+  String get reported => _isSpanish ? AppLocalizationsEs.reported : AppLocalizationsEn.reported;
+  String get close => _isSpanish ? AppLocalizationsEs.close : AppLocalizationsEn.close;
+  String get timeAgoMinutes => _isSpanish ? AppLocalizationsEs.timeAgoMinutes : AppLocalizationsEn.timeAgoMinutes;
+  String get timeAgoHours => _isSpanish ? AppLocalizationsEs.timeAgoHours : AppLocalizationsEn.timeAgoHours;
+  String get timeAgoYesterday => _isSpanish ? AppLocalizationsEs.timeAgoYesterday : AppLocalizationsEn.timeAgoYesterday;
+  String get timeAgoDays => _isSpanish ? AppLocalizationsEs.timeAgoDays : AppLocalizationsEn.timeAgoDays;
+  String get mustLogin => _isSpanish ? AppLocalizationsEs.mustLogin : AppLocalizationsEn.mustLogin;
+  String get markerCreated => _isSpanish ? AppLocalizationsEs.markerCreated : AppLocalizationsEn.markerCreated;
+  String get markerUpdated => _isSpanish ? AppLocalizationsEs.markerUpdated : AppLocalizationsEn.markerUpdated;
+  String get markerDeleted => _isSpanish ? AppLocalizationsEs.markerDeleted : AppLocalizationsEn.markerDeleted;
+  String get errorCreating => _isSpanish ? AppLocalizationsEs.errorCreating : AppLocalizationsEn.errorCreating;
+  String get errorUpdating => _isSpanish ? AppLocalizationsEs.errorUpdating : AppLocalizationsEn.errorUpdating;
+  String get errorDeleting => _isSpanish ? AppLocalizationsEs.errorDeleting : AppLocalizationsEn.errorDeleting;
 
   // Data Analysis
   String get analysisTitle => _isSpanish ? AppLocalizationsEs.analysisTitle : AppLocalizationsEn.analysisTitle;

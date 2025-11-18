@@ -47,6 +47,22 @@ class AppLocalizationsEn {
   static const String description = 'Description';
   static const String addDetails = 'Add more details';
   static const String addPhoto = 'Add photo';
+  static const String markerInfo = 'Marker information';
+  static const String type = 'Type';
+  static const String experience = 'Experience';
+  static const String reported = 'Reported';
+  static const String close = 'Close';
+  static const String timeAgoMinutes = '{0} min ago';
+  static const String timeAgoHours = '{0}h ago';
+  static const String timeAgoYesterday = 'Yesterday';
+  static const String timeAgoDays = '{0} days ago';
+  static const String mustLogin = 'You must log in to create markers';
+  static const String markerCreated = 'Marker created successfully';
+  static const String markerUpdated = 'Marker updated successfully';
+  static const String markerDeleted = 'Marker deleted successfully';
+  static const String errorCreating = 'Error creating marker';
+  static const String errorUpdating = 'Error updating marker';
+  static const String errorDeleting = 'Error deleting marker';
   
   // Data Analysis Page
   static const String analysisTitle = 'Zone Analysis';

@@ -47,6 +47,22 @@ class AppLocalizationsEs {
   static const String description = 'Descripción';
   static const String addDetails = 'Agrega más detalles';
   static const String addPhoto = 'Agregar foto';
+  static const String markerInfo = 'Información del marcador';
+  static const String type = 'Tipo';
+  static const String experience = 'Experiencia';
+  static const String reported = 'Reportado';
+  static const String close = 'Cerrar';
+  static const String timeAgoMinutes = 'Hace {0} min';
+  static const String timeAgoHours = 'Hace {0}h';
+  static const String timeAgoYesterday = 'Ayer';
+  static const String timeAgoDays = 'Hace {0} días';
+  static const String mustLogin = 'Debes iniciar sesión para crear marcadores';
+  static const String markerCreated = 'Marcador creado exitosamente';
+  static const String markerUpdated = 'Marcador actualizado exitosamente';
+  static const String markerDeleted = 'Marcador eliminado exitosamente';
+  static const String errorCreating = 'Error al crear marcador';
+  static const String errorUpdating = 'Error al actualizar marcador';
+  static const String errorDeleting = 'Error al eliminar marcador';
   
   // Notifications
   static const String alertNearby = '⚠️ Alerta, cerca de aquí se reportó:';

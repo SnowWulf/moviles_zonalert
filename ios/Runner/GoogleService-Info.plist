@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyA35ByZtZ6DfCFCIpbW-aH6wk3Z4Yuac9s</string>
+	<key>GCM_SENDER_ID</key>
+	<string>992213462471</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.zonalertNew</string>
+	<key>PROJECT_ID</key>
+	<string>test-5c420</string>
+	<key>STORAGE_BUCKET</key>
+	<string>test-5c420.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:992213462471:ios:7d4f6bc37479e6b71a3de2</string>
+	<key>DATABASE_URL</key>
+	<string>https://test-5c420-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
