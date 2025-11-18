@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 //Para datos
 import 'package:provider/provider.dart';
@@ -16,6 +18,12 @@ final ValueNotifier<Locale> localeNotifier = ValueNotifier(const Locale('es', ''
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   await AlertHelper.init();
   
   final prefs = await SharedPreferences.getInstance();

@@ -43,3 +43,22 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ====================================
+# Firebase Configuration Files
+# ====================================
+# NOTA: Estos archivos normalmente se ignoran por seguridad,
+# pero para este proyecto personal se incluyen en el repositorio.
+# Los siguientes archivos DEBEN estar en el repositorio:
+# - android/app/google-services.json (Android Firebase config)
+# - ios/Runner/GoogleService-Info.plist (iOS Firebase config)
+# - lib/firebase_options.dart (Flutter Firebase options)
+# - firebase.json (Firebase CLI config)
+# - .firebaserc (Firebase project config, si existe)
+
+# NO ignorar archivos de configuración de Firebase
+!android/app/google-services.json
+!ios/Runner/GoogleService-Info.plist
+!lib/firebase_options.dart
+!firebase.json
+!.firebaserc

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' show Random;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/config.dart';
 
@@ -18,12 +19,24 @@ class _InicioPageState extends State<InicioPage> {
 
   bool _cargandoNoticias = true;
   List<Map<String, dynamic>> noticias = [];
+  
+  String _nombreUsuario = 'Usuario';
 
   @override
   void initState() {
     super.initState();
+    _cargarDatosUsuario();
     _cargarDatos();
     _cargarNoticias();
+  }
+  
+  void _cargarDatosUsuario() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        _nombreUsuario = user.displayName ?? user.email?.split('@')[0] ?? 'Usuario';
+      });
+    }
   }
 
   /// Simula la carga de datos de seguridad
@@ -121,7 +134,7 @@ class _InicioPageState extends State<InicioPage> {
                             ),
                           ),
                           Text(
-                            l10n.user,
+                            _nombreUsuario,
                             style: TextStyle(
                               color: theme.textTheme.bodyMedium?.color ?? Colors.black,
                               fontWeight: FontWeight.bold,
@@ -261,8 +274,8 @@ class _InicioPageState extends State<InicioPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Color.fromRGBO((color.red), (color.green), (color.blue), 0.15),
-        border: Border.all(color: Color.fromRGBO((color.red), (color.green), (color.blue), 0.5), width: 1),
+        color: Color.fromRGBO((color.r * 255.0).round() & 0xff, (color.g * 255.0).round() & 0xff, (color.b * 255.0).round() & 0xff, 0.15),
+        border: Border.all(color: Color.fromRGBO((color.r * 255.0).round() & 0xff, (color.g * 255.0).round() & 0xff, (color.b * 255.0).round() & 0xff, 0.5), width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),

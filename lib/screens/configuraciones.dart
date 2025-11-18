@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/alert_helper.dart';
 import '../../main.dart';
 import '../l10n/app_localizations.dart';
+import '../services/auth_service.dart';
+import 'login_page.dart';
 
 class ConfiguracionesPage extends StatefulWidget {
   const ConfiguracionesPage({super.key});
@@ -17,11 +19,16 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
   bool _modoOscuro = true;
   String _idioma = 'es'; // español por defecto
   bool _cargando = true;
+  
+  // Datos del usuario
+  String _nombreUsuario = 'Usuario';
+  String _emailUsuario = 'correo@ejemplo.com';
 
   @override
   void initState() {
     super.initState();
     _cargarConfiguraciones();
+    _cargarDatosUsuario();
   }
 
   Future<void> _cargarConfiguraciones() async {
@@ -34,6 +41,28 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
       darkModeNotifier.value = _modoOscuro;
       _cargando = false;
     });
+  }
+
+  Future<void> _cargarDatosUsuario() async {
+    final authService = AuthService();
+    final user = authService.currentUser;
+    
+    if (user != null) {
+      // Obtener datos de Firebase Auth
+      setState(() {
+        _nombreUsuario = user.displayName ?? 'Usuario';
+        _emailUsuario = user.email ?? 'correo@ejemplo.com';
+      });
+      
+      // También puedes obtener datos de Firestore si lo prefieres
+      final userData = await authService.getUserData();
+      if (userData != null && mounted) {
+        setState(() {
+          _nombreUsuario = userData['nombre'] ?? user.displayName ?? 'Usuario';
+          _emailUsuario = userData['email'] ?? user.email ?? 'correo@ejemplo.com';
+        });
+      }
+    }
   }
 
   Future<void> _guardarConfiguraciones() async {
@@ -81,11 +110,23 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: dorado),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.logoutSuccess)),
-              );
+              
+              // Cerrar sesión con Firebase
+              await AuthService().signOut();
+              
+              // Navegar a la pantalla de login y limpiar el stack
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                  (route) => false,
+                );
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.logoutSuccess)),
+                );
+              }
             },
             child: Text(l10n.logout, style: const TextStyle(color: Colors.black)),
           ),
@@ -140,30 +181,42 @@ class _ConfiguracionesPageState extends State<ConfiguracionesPage> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 35,
-                    backgroundImage: AssetImage('android/assets/avatar.png'),
+                    backgroundColor: dorado,
+                    child: Text(
+                      _nombreUsuario.isNotEmpty ? _nombreUsuario[0].toUpperCase() : 'U',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.user,
-                        style: TextStyle(
-                          color: theme.textTheme.bodyMedium?.color ?? Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold
-                        )
-                      ),
-                      Text(
-                        l10n.userEmail,
-                        style: TextStyle(
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
-                          fontSize: 14
-                        )
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _nombreUsuario,
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color ?? Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          _emailUsuario,
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ?? Colors.black54, 
+                            fontSize: 14
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),
