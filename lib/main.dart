@@ -70,73 +70,132 @@ class ZonAlertApp extends StatelessWidget {
                 brightness: Brightness.light,
                 primarySwatch: Colors.indigo,
                 scaffoldBackgroundColor: Colors.white,
-                cardColor: Colors.grey.shade50,
+                cardColor: Colors.white,
+                dialogTheme: const DialogThemeData(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                ),
                 appBarTheme: const AppBarTheme(
                   backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  iconTheme: IconThemeData(color: Color(0xFFE9AE5D)),
+                  foregroundColor: Colors.black87,
+                  iconTheme: IconThemeData(color: Color(0xFFD97706)), // Ámbar oscuro
                   titleTextStyle: TextStyle(
-                    color: Color(0xFFE9AE5D), 
+                    color: Color(0xFFD97706), // Ámbar oscuro
                     fontWeight: FontWeight.bold, 
                     fontSize: 20
                   ),
+                  elevation: 2,
                 ),
                 bottomNavigationBarTheme: const BottomNavigationBarThemeData(
                   backgroundColor: Colors.white,
-                  selectedItemColor: Color(0xFFE9AE5D),
+                  selectedItemColor: Color(0xFFD97706), // Ámbar oscuro
                   unselectedItemColor: Colors.grey,
                   type: BottomNavigationBarType.fixed,
+                  elevation: 8,
                 ),
                 sliderTheme: SliderThemeData(
-                  activeTrackColor: const Color(0xFFE9AE5D),
+                  activeTrackColor: const Color(0xFFD97706),
                   inactiveTrackColor: Colors.grey.shade300,
-                  thumbColor: const Color(0xFFE9AE5D),
-                  overlayColor: const Color(0xFFE9AE5D).withValues(alpha: 0.2),
-                  valueIndicatorColor: const Color(0xFFE9AE5D),
-                  valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+                  thumbColor: const Color(0xFFD97706),
+                  overlayColor: const Color(0xFFD97706).withValues(alpha: 0.2),
+                  valueIndicatorColor: const Color(0xFFD97706),
+                  valueIndicatorTextStyle: const TextStyle(color: Colors.white),
                 ),
                 textTheme: const TextTheme(
                   bodyMedium: TextStyle(color: Colors.black87),
+                  titleLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD97706),
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                  ),
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFD97706), width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
                 ),
                 colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
-                    .copyWith(secondary: const Color(0xFFE9AE5D)),
+                    .copyWith(
+                      secondary: const Color(0xFFD97706), // Ámbar oscuro
+                      brightness: Brightness.light,
+                    ),
               ),
               darkTheme: ThemeData(
                 brightness: Brightness.dark,
                 primarySwatch: Colors.indigo,
-                scaffoldBackgroundColor: const Color(0xFF142535),
-                cardColor: const Color(0xFF1C3C50),
+                scaffoldBackgroundColor: const Color(0xFF0F1419),
+                cardColor: const Color(0xFF1A1F26),
+                dialogTheme: const DialogThemeData(
+                  backgroundColor: Color(0xFF1A1F26),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                ),
                 appBarTheme: const AppBarTheme(
-                  backgroundColor: Color(0xFF142535),
-                  foregroundColor: Color(0xFFE9AE5D),
-                  iconTheme: IconThemeData(color: Color(0xFFE9AE5D)),
+                  backgroundColor: Color(0xFF1A1F26),
+                  foregroundColor: Color(0xFFFFA726),
+                  iconTheme: IconThemeData(color: Color(0xFFFFA726)),
                   titleTextStyle: TextStyle(
-                    color: Color(0xFFE9AE5D), 
+                    color: Color(0xFFFFA726), 
                     fontWeight: FontWeight.bold, 
                     fontSize: 20
                   ),
+                  elevation: 0,
                 ),
                 bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-                  backgroundColor: Color(0xFF142535),
-                  selectedItemColor: Color(0xFFE9AE5D),
-                  unselectedItemColor: Colors.white70,
+                  backgroundColor: Color(0xFF1A1F26),
+                  selectedItemColor: Color(0xFFFFA726),
+                  unselectedItemColor: Colors.white60,
                   type: BottomNavigationBarType.fixed,
+                  elevation: 8,
                 ),
                 sliderTheme: SliderThemeData(
-                  activeTrackColor: const Color(0xFFE9AE5D),
-                  inactiveTrackColor: Colors.grey.shade600,
-                  thumbColor: const Color(0xFFE9AE5D),
-                  overlayColor: const Color(0xFFE9AE5D).withValues(alpha: 0.2),
-                  valueIndicatorColor: const Color(0xFFE9AE5D),
+                  activeTrackColor: const Color(0xFFFFA726),
+                  inactiveTrackColor: Colors.grey.shade700,
+                  thumbColor: const Color(0xFFFFA726),
+                  overlayColor: const Color(0xFFFFA726).withValues(alpha: 0.2),
+                  valueIndicatorColor: const Color(0xFFFFA726),
                   valueIndicatorTextStyle: const TextStyle(color: Colors.black),
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA726),
+                    foregroundColor: Colors.black,
+                    elevation: 2,
+                  ),
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade700),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFFFA726), width: 2),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFF252B33),
                 ),
                 textTheme: const TextTheme(
                   bodyMedium: TextStyle(color: Colors.white),
+                  titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 colorScheme: ColorScheme.fromSwatch(
                   primarySwatch: Colors.indigo, 
                   brightness: Brightness.dark
-                ).copyWith(secondary: const Color(0xFFE9AE5D)),
+                ).copyWith(secondary: const Color(0xFFFFA726)),
               ),
               themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
               

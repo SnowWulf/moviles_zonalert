@@ -12,6 +12,8 @@ import '../l10n/app_localizations.dart';
 import '../models/marcador_info.dart';
 import 'package:provider/provider.dart';
 import '../providers/zonas_provider.dart';
+import '../services/marcadores_service.dart';
+import '../services/auth_service.dart';
 
 
 typedef OnDataChangedCallback = void Function(
@@ -79,9 +81,14 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
   final double _zoomActual = 16.0;
   StreamSubscription<Position>? _posicionStream;
   StreamSubscription<CompassEvent>? _compassSubscription;
+  StreamSubscription<List<MarcadorInfo>>? _marcadoresStream;
   double _currentHeading = 0;
   final Map<String, MarcadorInfo> _marcadoresInfo = {};
   double _radioAlerta = 100;
+  
+  // Servicios Firebase
+  final MarcadoresService _marcadoresService = MarcadoresService();
+  final AuthService _authService = AuthService();
 
   final List<List<LatLng>> _zonasPeligrosas = [
     [
@@ -101,6 +108,7 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
     _flotarController.dispose();
     _compassSubscription?.cancel();
     _posicionStream?.cancel();
+    _marcadoresStream?.cancel();
     super.dispose();
   }
 
@@ -180,6 +188,7 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
     );
 
     _iniciarSeguimientoUbicacion();
+    _escucharMarcadoresFirebase();
 
     double lerp(double a, double b, double t) => a + (b - a) * t;
     
@@ -198,18 +207,266 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
   });
   }
 
-  void _abrirDialogoMarcador({required LatLng posicion, String? idExistente}) {
-    final marcadorExistente = idExistente != null ? _marcadoresInfo[idExistente] : null;
+  // Escuchar cambios de marcadores en tiempo real desde Firebase
+  void _escucharMarcadoresFirebase() {
+    _marcadoresStream = _marcadoresService.escucharMarcadores().listen((marcadores) {
+      setState(() {
+        _marcadoresInfo.clear();
+        for (var marcadorInfo in marcadores) {
+          // Crear el widget del marcador con la animación
+          final marcadorConWidget = MarcadorInfo(
+            id: marcadorInfo.id,
+            marker: Marker(
+              point: marcadorInfo.marker.point,
+              width: 50,
+              height: 50,
+              child: GestureDetector(
+                onTap: () => _abrirDialogoMarcador(
+                  posicion: marcadorInfo.marker.point,
+                  idExistente: marcadorInfo.id,
+                ),
+                child: AnimatedBuilder(
+                  animation: _flotarAnim,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, -_flotarAnim.value),
+                      child: child,
+                    );
+                  },
+                  child: _imagenMarcador(marcadorInfo.tipoExperiencia, marcadorInfo.experiencia),
+                ),
+              ),
+            ),
+            tipoExperiencia: marcadorInfo.tipoExperiencia,
+            experiencia: marcadorInfo.experiencia,
+            descripcion: marcadorInfo.descripcion,
+            userId: marcadorInfo.userId,
+            fechaCreacion: marcadorInfo.fechaCreacion,
+            fotoUrl: marcadorInfo.fotoUrl,
+          );
+          _marcadoresInfo[marcadorInfo.id] = marcadorConWidget;
+        }
+      });
+      _notificarCambios();
+    });
+  }
 
-    String tipoExperiencia = marcadorExistente?.tipoExperiencia ?? 'Bueno';
-    String experiencia = marcadorExistente?.experiencia ?? 'Sin incidente';
+  // Método auxiliar para crear imagen del marcador
+  Widget _imagenMarcador(String tipoExp, String exp) {
+    // Si no hubo incidente, mostrar carita según el tipo de experiencia
+    if (exp == 'Sin incidente') {
+      switch (tipoExp) {
+        case 'Bueno':
+          return Image.asset('assets/cara_buena.png', width: 45, height: 45);
+        case 'Regular':
+          return Image.asset('assets/cara_regular.png', width: 45, height: 45);
+        case 'Malo':
+          return Image.asset('assets/cara_mala.png', width: 45, height: 45);
+      }
+    }
+
+    // Si hubo incidente, usar el ícono del incidente
+    switch (exp) {
+      case 'Robo':
+        return Image.asset('assets/bandit.png', width: 45, height: 45);
+      case 'Accidente':
+        return Image.asset('assets/fender.png', width: 45, height: 45);
+      case 'Calle oscura':
+        return Image.asset('assets/dark.png', width: 45, height: 45);
+      default:
+        return Image.asset('assets/other.png', width: 45, height: 45);
+    }
+  }
+
+  // Mostrar información de un marcador sin permitir edición
+  void _mostrarInfoMarcador(MarcadorInfo marcador) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: theme.dialogTheme.backgroundColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Text(
+                    l10n.markerInfo,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            marcador.tipoExperiencia == 'Bueno'
+                                ? Icons.sentiment_satisfied
+                                : marcador.tipoExperiencia == 'Regular'
+                                    ? Icons.sentiment_neutral
+                                    : Icons.sentiment_dissatisfied,
+                            color: marcador.tipoExperiencia == 'Bueno'
+                                ? Colors.green
+                                : marcador.tipoExperiencia == 'Regular'
+                                    ? Colors.amber
+                                    : Colors.red,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${l10n.type}: ${marcador.tipoExperiencia}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: theme.textTheme.bodyLarge?.color,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${l10n.experience}: ${marcador.experiencia}",
+                                  style: TextStyle(
+                                    color: theme.textTheme.bodyMedium?.color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (marcador.descripcion.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.description,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          marcador.descripcion,
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${l10n.reported}: ${_formatearFecha(marcador.fechaCreacion, l10n)}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(l10n.close),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Formatear fecha de forma legible
+  String _formatearFecha(DateTime fecha, AppLocalizations l10n) {
+    final ahora = DateTime.now();
+    final diferencia = ahora.difference(fecha);
+    
+    if (diferencia.inDays == 0) {
+      if (diferencia.inHours == 0) {
+        return l10n.timeAgoMinutes.replaceAll('{0}', '${diferencia.inMinutes}');
+      }
+      return l10n.timeAgoHours.replaceAll('{0}', '${diferencia.inHours}');
+    } else if (diferencia.inDays == 1) {
+      return l10n.timeAgoYesterday;
+    } else if (diferencia.inDays < 7) {
+      return l10n.timeAgoDays.replaceAll('{0}', '${diferencia.inDays}');
+    } else {
+      return '${fecha.day}/${fecha.month}/${fecha.year}';
+    }
+  }
+
+  void _abrirDialogoMarcador({required LatLng posicion, String? idExistente}) async {
+    final marcadorExistente = idExistente != null ? _marcadoresInfo[idExistente] : null;
+    
+    // Verificar si el usuario actual puede editar este marcador
+    final currentUserId = _authService.currentUser?.uid;
+    final bool puedeEditar = idExistente == null || 
+        (marcadorExistente != null && marcadorExistente.userId == currentUserId);
+    
+    if (idExistente != null && !puedeEditar) {
+      // Solo mostrar información, no permitir edición
+      _mostrarInfoMarcador(marcadorExistente!);
+      return;
+    }
+
+    // Valores internos constantes (no traducidos)
+    const String valorBueno = 'Bueno';
+    const String valorRegular = 'Regular';
+    const String valorMalo = 'Malo';
+    const String valorSinIncidente = 'Sin incidente';
+    const String valorRobo = 'Robo';
+    const String valorAccidente = 'Accidente';
+    const String valorCalleOscura = 'Calle oscura';
+    const String valorOtra = 'Otra';
+    
+    String tipoExperiencia = marcadorExistente?.tipoExperiencia ?? valorBueno;
+    String experiencia = marcadorExistente?.experiencia ?? valorSinIncidente;
     String otraExperiencia = '';
     String descripcion = marcadorExistente?.descripcion ?? '';
 
     // Si el marcador anterior tenía una experiencia "Otra" la restauramos
-    if (!["Sin incidente", "Robo", "Accidente", "Calle oscura"].contains(experiencia)) {
+    if (![valorSinIncidente, valorRobo, valorAccidente, valorCalleOscura].contains(experiencia)) {
       otraExperiencia = experiencia;
-      experiencia = "Otra";
+      experiencia = valorOtra;
     }
 
     final TextEditingController descripcionController =
@@ -218,20 +475,25 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
         TextEditingController(text: otraExperiencia);
 
     final List<String> opcionesExperiencia = [
-      "Sin incidente",
-      "Robo",
-      "Accidente",
-      "Calle oscura",
-      "Otra",
+      valorSinIncidente,
+      valorRobo,
+      valorAccidente,
+      valorCalleOscura,
+      valorOtra,
     ];
+
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Dialog(
+          backgroundColor: theme.dialogTheme.backgroundColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: StatefulBuilder(
               builder: (context, setStateDialog) => Column(
                 mainAxisSize: MainAxisSize.min,
@@ -239,83 +501,129 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
                 children: [
                   Center(
                     child: Text(
-                      idExistente == null
-                          ? "Agrega tu experiencia en este lugar"
-                          : "Editar marcador existente",
-                      style: const TextStyle(
+                      idExistente == null ? l10n.addExperience : l10n.editMarker,
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.indigo,
+                        color: theme.colorScheme.secondary,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   //Tipo de experiencia
-                  const Text("Tipo de experiencia"),
-                  DropdownButton<String>(
-                    value: tipoExperiencia,
-                    isExpanded: true,
-                    items: ['Bueno', 'Regular', 'Malo']
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    e == 'Bueno'
-                                        ? Icons.sentiment_satisfied
-                                        : e == 'Regular'
-                                            ? Icons.sentiment_neutral
-                                            : Icons.sentiment_dissatisfied,
-                                    color: e == 'Bueno'
-                        ? Colors.green
-                        : e == 'Regular'
-                          ? Colors.amber
-                          : Colors.red,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(e),
-                                ],
-                              ),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setStateDialog(() {
-                        tipoExperiencia = value!;
-                        // Si es buena, deshabilitamos los incidentes
-                        if (tipoExperiencia == 'Bueno') {
-                          experiencia = 'Sin incidente';
-                        }
-                      });
-                    },
+                  Text(
+                    l10n.experienceType,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: DropdownButton<String>(
+                      value: tipoExperiencia,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      items: [
+                        DropdownMenuItem(
+                          value: valorBueno,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.sentiment_satisfied, color: Colors.green),
+                              const SizedBox(width: 8),
+                              Text(l10n.good),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: valorRegular,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.sentiment_neutral, color: Colors.amber),
+                              const SizedBox(width: 8),
+                              Text(l10n.regular),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: valorMalo,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.sentiment_dissatisfied, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Text(l10n.bad),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          tipoExperiencia = value!;
+                          // Si es buena, deshabilitamos los incidentes
+                          if (tipoExperiencia == valorBueno) {
+                            experiencia = valorSinIncidente;
+                          }
+                        });
+                      },
+                    ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // Tipo de incidente
-                  const Text("Tipo de incidente"),
-                  const SizedBox(height: 4),
+                  Text(
+                    l10n.incidentType,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
 
                   Opacity(
-                    opacity: tipoExperiencia == 'Bueno' ? 0.5 : 1.0,
+                    opacity: tipoExperiencia == valorBueno ? 0.5 : 1.0,
                     child: IgnorePointer(
-                      ignoring: tipoExperiencia == 'Bueno',
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: opcionesExperiencia.contains(experiencia)
-                            ? experiencia
-                            : "Sin incidente",
-                        items: opcionesExperiencia
-                            .map((e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Text(e),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setStateDialog(() {
-                            experiencia = value!;
-                          });
-                        },
+                      ignoring: tipoExperiencia == valorBueno,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                          ),
+                        ),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          value: opcionesExperiencia.contains(experiencia)
+                              ? experiencia
+                              : valorSinIncidente,
+                          items: [
+                            DropdownMenuItem(value: valorSinIncidente, child: Text(l10n.noIncident)),
+                            DropdownMenuItem(value: valorRobo, child: Text(l10n.robbery)),
+                            DropdownMenuItem(value: valorAccidente, child: Text(l10n.accident)),
+                            DropdownMenuItem(value: valorCalleOscura, child: Text(l10n.darkStreet)),
+                            DropdownMenuItem(value: valorOtra, child: Text(l10n.other)),
+                          ],
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              experiencia = value!;
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -335,79 +643,109 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
                     ),
                   ],
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   //Descripción
-                  const Text("Descripción"),
+                  Text(
+                    l10n.description,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   TextField(
                     controller: descripcionController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
-                      hintText: "Agrega más detalles",
-                      border: OutlineInputBorder(),
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                    decoration: InputDecoration(
+                      hintText: l10n.addDetails,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
                     ),
                     onChanged: (value) {
                       descripcion = value;
                     },
                   ),
 
-                  const SizedBox(height: 12),
-
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text("Agregar foto"),
-                  ),
-
                   const SizedBox(height: 16),
 
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: 10,
-                    runSpacing: 10,
+                  OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.camera_alt),
+                    label: Text(l10n.addPhoto),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      side: BorderSide(color: theme.colorScheme.secondary),
+                      foregroundColor: theme.colorScheme.secondary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Botones de acción
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (idExistente != null)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.error,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _eliminarMarcador(idExistente);
-                          },
-                          icon: const Icon(Icons.delete),
-                          label: const Text("Eliminar"),
-                        ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancelar"),
-                          ),
-                          ElevatedButton(
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                             onPressed: () {
-                              Navigator.pop(context);
-                              _guardarMarcador(
-                                idExistente ??
-                                    DateTime.now()
-                                      .millisecondsSinceEpoch
-                                      .toString(),
-                                posicion,
-                                tipoExperiencia,
-                                tipoExperiencia == 'Bueno'
-                                    ? 'Sin incidente'
-                                    : (experiencia == 'Otra'
-                                        ? otraExperienciaController.text
-                                        : experiencia),
-                                descripcionController.text,
-                              );
+                              Navigator.pop(dialogContext);
+                              _eliminarMarcador(idExistente);
                             },
-                            child: Text(idExistente == null
-                                ? "Agregar"
-                                : "Guardar"),
+                            icon: const Icon(Icons.delete, size: 20),
+                            label: Text(l10n.delete),
                           ),
-                        ],
+                        ),
+                      if (idExistente != null) const SizedBox(width: 12),
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: idExistente != null ? 1 : 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(dialogContext);
+                            _guardarMarcador(
+                              idExistente ??
+                                  DateTime.now()
+                                    .millisecondsSinceEpoch
+                                    .toString(),
+                              posicion,
+                              tipoExperiencia,
+                              tipoExperiencia == valorBueno
+                                  ? valorSinIncidente
+                                  : (experiencia == valorOtra
+                                      ? otraExperienciaController.text
+                                      : experiencia),
+                              descripcionController.text,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(idExistente == null ? l10n.add : l10n.save),
+                        ),
                       ),
                     ],
                   ),
@@ -426,33 +764,21 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
     String tipoExperiencia,
     String experiencia,
     String descripcion,
-  ) {
-    Widget imagenMarcador(String tipoExp, String exp) {
-      // Si no hubo incidente, mostrar carita según el tipo de experiencia
-      if (exp == 'Sin incidente') {
-        switch (tipoExp) {
-          case 'Bueno':
-            return Image.asset('assets/cara_buena.png', width: 45, height: 45);
-          case 'Regular':
-            return Image.asset('assets/cara_regular.png', width: 45, height: 45);
-          case 'Malo':
-            return Image.asset('assets/cara_mala.png', width: 45, height: 45);
-        }
-      }
-
-      // Si hubo incidente, usar el ícono del incidente
-      switch (exp) {
-        case 'Robo':
-          return Image.asset('assets/bandit.png', width: 45, height: 45);
-        case 'Accidente':
-          return Image.asset('assets/fender.png', width: 45, height: 45);
-        case 'Calle oscura':
-          return Image.asset('assets/dark.png', width: 45, height: 45);
-        default:
-          return Image.asset('assets/other.png', width: 45, height: 45);
-      }
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final currentUserId = _authService.currentUser?.uid;
+    
+    if (currentUserId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.mustLogin)),
+      );
+      return;
     }
 
+    // Verificar si es actualización o creación nueva
+    final bool esNuevo = !_marcadoresInfo.containsKey(id);
+    
     final Marker marcador = Marker(
       point: posicion,
       width: 50,
@@ -467,30 +793,77 @@ class _MapaPageState extends State<MapaPage> with SingleTickerProviderStateMixin
               child: child,
             );
           },
-          child: imagenMarcador(tipoExperiencia, experiencia),
+          child: _imagenMarcador(tipoExperiencia, experiencia),
         ),
       ),
     );
 
-    setState(() {
-      _marcadoresInfo[id] = MarcadorInfo(
-        marker: marcador,
-        tipoExperiencia: tipoExperiencia,
-        experiencia: experiencia,
-        descripcion: descripcion,
+    final marcadorInfo = MarcadorInfo(
+      id: id,
+      marker: marcador,
+      tipoExperiencia: tipoExperiencia,
+      experiencia: experiencia,
+      descripcion: descripcion,
+      userId: currentUserId,
+      fechaCreacion: esNuevo ? DateTime.now() : (_marcadoresInfo[id]?.fechaCreacion ?? DateTime.now()),
+    );
+
+    // Guardar en Firebase
+    final resultado = esNuevo
+        ? await _marcadoresService.crearMarcador(marcadorInfo)
+        : await _marcadoresService.actualizarMarcador(marcadorInfo);
+
+    if (!mounted) return;
+
+    if (resultado['success']) {
+      // Para el reporte diario (solo si es nuevo)
+      if (esNuevo) {
+        context.read<ZonasProvider>().registrarReporteHoy();
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(esNuevo ? l10n.markerCreated : l10n.markerUpdated),
+          backgroundColor: Colors.green,
+        ),
       );
-    });
-    //Para el reporte diario
-    context.read<ZonasProvider>().registrarReporteHoy();
-    //para avisar de un cambio a providers:
-    _notificarCambios();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(esNuevo ? l10n.errorCreating : l10n.errorUpdating),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    
+    // No necesitamos llamar setState ni _notificarCambios 
+    // porque el listener de Firebase lo hará automáticamente
   }
 
-  void _eliminarMarcador(String id) {
-    setState(() {
-      _marcadoresInfo.remove(id);
-    });
-    _notificarCambios();
+  void _eliminarMarcador(String id) async {
+    final l10n = AppLocalizations.of(context);
+    final resultado = await _marcadoresService.eliminarMarcador(id);
+    
+    if (!mounted) return;
+    
+    if (resultado['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.markerDeleted),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.errorDeleting),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    
+    // No necesitamos setState ni _notificarCambios
+    // porque el listener de Firebase lo hará automáticamente
   }
   
   void _notificarCambios() {
